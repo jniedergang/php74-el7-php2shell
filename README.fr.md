@@ -130,7 +130,7 @@ Telecharger les RPM depuis la [page des releases](../../releases), puis :
 sha256sum -c SHA256SUMS
 rpm --import RPM-GPG-KEY-php74-el7-php2shell
 rpm -K *.rpm                     # attendu : "pgp md5 OK" pour chaque paquet
-yum update ./php74-php-*.rpm     # ou servir le dossier comme depot yum local
+yum update ./php74-php-*.x86_64.rpm     # ou servir le dossier comme depot yum local
 systemctl restart php74-php-fpm  # et/ou httpd en mod_php
 ```
 
