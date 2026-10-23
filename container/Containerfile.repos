@@ -1,0 +1,14 @@
+# Image de base CentOS 7.9 avec depots vault + SCLo + EPEL archive + remi-safe.
+# Sert a la fois au build (build.sh y ajoute la chaine de compilation)
+# et aux tests sur machine propre (test.sh).
+FROM docker.io/library/centos:7@sha256:dead07b4d8ed7e29e98de0f4504d87e8880d4347859d839686a31da35a3b532f
+RUN rm -f /etc/yum.repos.d/*.repo
+# vault.centos.org (CloudFront) repond 403 sur les *.sqlite.bz2 depuis 2026 :
+# mddownloadpolicy=xml force yum a utiliser primary.xml.gz, toujours servi.
+COPY keys/RPM-GPG-KEY-remi keys/RPM-GPG-KEY-EPEL-7 keys/RPM-GPG-KEY-CentOS-SIG-SCLo /etc/pki/rpm-gpg/
+COPY el7-vault.repo /etc/yum.repos.d/el7-vault.repo
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 /etc/pki/rpm-gpg/RPM-GPG-KEY-remi \
+        /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-SCLo \
+ && echo 'skip_missing_names_on_install=0' >> /etc/yum.conf \
+ && echo 'mddownloadpolicy=xml' >> /etc/yum.conf \
+ && yum -q makecache

@@ -1,0 +1,5 @@
+# Chaine de compilation RPM EL7 pour php74-php (SCL remi).
+ARG BASE=localhost/php74-el7-repos:latest
+FROM ${BASE}
+RUN yum -y -q install rpm-build yum-utils scl-utils-build php74-build gnupg2 which \
+ && yum clean all

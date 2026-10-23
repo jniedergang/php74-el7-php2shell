@@ -1,0 +1,6 @@
+out/
+*.rpm
+*.tar
+*.tar.*
+*.tgz
+!SOURCES/*.patch
