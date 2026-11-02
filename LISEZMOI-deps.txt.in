@@ -1,0 +1,58 @@
+Dépendances Remi et EPEL des paquets php74-php-* @VERSION@ (CentOS 7, x86_64)
+===============================================================================
+
+Cette archive complète l'archive php74-el7-php2shell-@VERSION@. Elle contient les paquets dont dépendent les paquets php74-php-* et qui ne font pas partie de CentOS 7 : ils proviennent du dépôt Remi « safe » pour EL7 et du dépôt EPEL 7 (archivé). Elle permet d'installer PHP 7.4 sur une machine CentOS 7.9 neuve sans accès à Internet. Seul un miroir des dépôts CentOS 7 base et updates est nécessaire.
+
+Sur un serveur qui fait déjà tourner PHP 7.4 depuis le dépôt Remi, ces paquets sont normalement déjà installés : cette archive n'est alors pas utile.
+
+Les paquets sont repris tels quels, sans recompilation, avec leur signature d'origine (Remi Collet pour les paquets .remi, projet Fedora EPEL pour les paquets .el7).
+
+AVERTISSEMENT : comme l'archive principale, ces paquets sont fournis à titre de dépannage, en dehors du périmètre de l'offre Multi-Linux Support, et ne sont pas supportés par SUSE.
+
+CONTENU
+
+@LISTE@
+
+FICHIERS
+
+- *.rpm : paquets signés par Remi ou par EPEL
+- repodata/ : métadonnées permettant d'utiliser ce dossier comme dépôt yum local
+- RPM-GPG-KEY-remi : clé publique de Remi Collet, empreinte 1EE0 4CCE 88A4 AE4A A29A 5DF5 004E 6F47 00F9 7F56 (aussi publiée sur https://rpms.remirepo.net/RPM-GPG-KEY-remi)
+- RPM-GPG-KEY-EPEL-7 : clé publique d'EPEL 7, empreinte 91E9 7D7C 4A5E 96F1 7F3E 888F 6A2F AEA2 352C 64E5 (aussi publiée sur https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7)
+- SHA256SUMS : sommes de contrôle
+
+1. VÉRIFIER LES PAQUETS
+
+sha256sum -c SHA256SUMS
+rpm --import RPM-GPG-KEY-remi RPM-GPG-KEY-EPEL-7
+rpm -K *.rpm
+
+Chaque paquet doit afficher « pgp md5 OK » (ou « (sha1) dsa sha1 md5 gpg OK » selon la clé).
+
+2. DÉCLARER LES DEUX DÉPÔTS LOCAUX
+
+Copier ce dossier sur le serveur, par exemple dans /opt/php74-php2shell-deps, et le dossier de l'archive principale dans /opt/php74-php2shell. Créer ensuite le fichier /etc/yum.repos.d/php74-php2shell.repo :
+
+[php74-php2shell]
+name=php74 EL7 PHP2Shell
+baseurl=file:///opt/php74-php2shell
+enabled=1
+gpgcheck=1
+gpgkey=file:///opt/php74-php2shell/RPM-GPG-KEY-php74-el7-php2shell
+
+[php74-php2shell-deps]
+name=php74 EL7 PHP2Shell, dependances Remi et EPEL
+baseurl=file:///opt/php74-php2shell-deps
+enabled=1
+gpgcheck=1
+gpgkey=file:///opt/php74-php2shell-deps/RPM-GPG-KEY-remi
+       file:///opt/php74-php2shell-deps/RPM-GPG-KEY-EPEL-7
+
+3. INSTALLER
+
+yum clean metadata
+yum install php74-php-cli php74-php-fpm
+
+Ajouter à la commande les extensions nécessaires (php74-php-mysqlnd, php74-php-gd, php74-php-mbstring, php74-php-intl...). Les autres dépendances (scl-utils, libjpeg-turbo, freetype...) viennent du miroir CentOS 7.
+
+Le reste de la procédure (redémarrage des services, contrôles, changements de comportement) est décrit dans le fichier LISEZMOI.txt de l'archive principale.

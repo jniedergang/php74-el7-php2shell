@@ -118,9 +118,37 @@ yum update ./php74-php-*.x86_64.rpm     # or serve the directory as a local yum 
 systemctl restart php74-php-fpm  # and/or httpd when using mod_php
 ```
 
-Remi's `safe` repository must stay reachable for the libraries the packages depend on
-(`gd3php`, `oniguruma5php`, `libzip5`, ...). Rollback: `yum downgrade 'php74-php*'`
-returns to Remi's `7.4.33-15.el7.remi`.
+Only the `php74-php-*` packages are rebuilt. Their other dependencies come unchanged
+from Remi's `safe` repository (`php74-runtime`, `gd3php`, `libicu73`, `libwebp7`,
+`oniguruma5php`) and from the archived EPEL 7 repository (`libraqm` for gd, plus
+`libsodium`, `libtidy`, `libc-client`, `freetds`, `firebird-libfbclient`, `lmdb-libs` for
+the matching extensions). On a server already running Remi's php74 they are installed,
+so the update above is enough. Rollback: `yum downgrade 'php74-php*'` returns to
+Remi's `7.4.33-15.el7.remi`.
+
+### Fresh CentOS 7 install
+
+Declare both repositories (still online), then `yum install php74-php-cli php74-php-fpm ...`:
+
+```
+[remi-safe]
+name=Remi safe repository for EL7
+baseurl=https://rpms.remirepo.net/enterprise/7/safe/$basearch/
+gpgcheck=1
+gpgkey=https://rpms.remirepo.net/RPM-GPG-KEY-remi
+
+[epel-archive]
+name=EPEL 7 (archive)
+baseurl=https://archives.fedoraproject.org/pub/archive/epel/7/$basearch/
+gpgcheck=1
+gpgkey=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
+```
+
+Without Internet access, `./deps.sh` builds a companion archive
+(`out/deps/php74-el7-php2shell-deps-<version>.tar.gz`) holding those 13 packages with
+their original Remi and EPEL signatures, `repodata/`, both public keys and a
+`LISEZMOI.txt`; only a CentOS 7 base/updates mirror is then needed. `./test-deps.sh`
+checks it on a `centos:7` container started with `--network=none`.
 
 ## Package signing
 
@@ -142,6 +170,9 @@ container/              Containerfiles, yum repos (vault, SCLo, EPEL archive, re
 build.sh                replayable full build
 sign.sh                 signs out/ RPMs in the CentOS 7 container (SIGN_KEY_FILE=...)
 test.sh                 replayable tests in a clean centos:7
+deps.sh                 companion archive of the Remi/EPEL dependencies (offline install)
+test-deps.sh            offline install test of that archive (--network=none)
+LISEZMOI-deps.txt.in    template of the companion archive README (French)
 tests/in-container.sh   test scenario run inside the container
 tests/php2shell/        extra .phpt tests (regression only, no exploit)
 out/                    (git-ignored) RPMs, build tree, logs

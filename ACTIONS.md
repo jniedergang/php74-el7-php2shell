@@ -49,3 +49,15 @@ Detail dans README.md, section Resultats.
 - Surveiller une eventuelle revision du correctif amont (mitigation qualifiee de minimale pour version EOL).
 - Condensat de signature SHA1 (defaut EL7) : re-signature SHA256 possible (`%_gpg_digest_algo sha256`).
 
+
+## 2026-11-02 : archive complementaire des dependances (installation sur machine neuve hors ligne)
+
+**Quoi.** `deps.sh` construit `out/deps/php74-el7-php2shell-deps-<version>.tar.gz` : les 13 paquets non CentOS dont dependent les `php74-php-*` (Remi safe : `php74-runtime`, `gd3php`, `libicu73`, `libwebp7`, `oniguruma5php` ; EPEL 7 archive : `libraqm`, `libsodium`, `libtidy`, `libc-client`, `freetds`, `freetds-libs`, `firebird-libfbclient`, `lmdb-libs`), signatures d'origine, `repodata/`, cles publiques, `LISEZMOI.txt` genere depuis `LISEZMOI-deps.txt.in`. `test-deps.sh` la teste hors ligne. README (fr, en) : section installation sur machine neuve ; correction de la liste des dependances (`libzip5` n'en fait pas partie, `php74-runtime` manquait).
+
+**Pourquoi.** Un utilisateur a tente l'installation sur un CentOS 7.9 neuf : echec sur `php74-runtime`, absent de la release. Les RPM etaient concus pour mettre a jour un php74 remi existant, ce que la doc ne disait pas assez clairement.
+
+**Comment.** Resolution yum complete dans un `centos:7` (vault + Remi safe + EPEL archive), tri des paquets telecharges par cle de signature (Remi `00f97f56`, EPEL `352c64e5`, CentOS ecarte, toute autre cle = echec). Piege : `[main]` est la section globale de yum, inutilisable comme identifiant de depot (« Nothing to do »).
+
+**Verification.** `./test-deps.sh` : mini-miroir de 132 paquets signes CentOS uniquement, puis conteneur `--network=none` : sans l'archive, echec sur `php74-runtime` (cas reproduit) ; avec, installation des 34 paquets en `gpgcheck=1`, `rpm -K` OK, `rpm -Va --nofiles` vide, toutes les extensions chargees sans avertissement, `php-fpm -t` OK. 0 echec.
+
+**Reste a faire.** Publier sur GitHub (README + scripts, et l'archive en asset de release) apres accord.
