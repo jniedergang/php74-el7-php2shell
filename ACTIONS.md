@@ -60,4 +60,4 @@ Detail dans README.md, section Resultats.
 
 **Verification.** `./test-deps.sh` : mini-miroir de 132 paquets signes CentOS uniquement, puis conteneur `--network=none` : sans l'archive, echec sur `php74-runtime` (cas reproduit) ; avec, installation des 34 paquets en `gpgcheck=1`, `rpm -K` OK, `rpm -Va --nofiles` vide, toutes les extensions chargees sans avertissement, `php-fpm -t` OK. 0 echec.
 
-**Reste a faire.** Publier sur GitHub (README + scripts, et l'archive en asset de release) apres accord.
+**Publie.** GitHub le 02/11/2026 : commit a8dfeff, archive deps en asset de la release v7.4.33-15.1 (somme verifiee apres telechargement), notes de release completees.
